@@ -66,7 +66,7 @@ def strip_markdown(text):
 
 # Clawdbot Gateway API (OpenAI-compatible endpoint)
 CLAWDBOT_API = os.getenv("CLAWDBOT_API", "http://127.0.0.1:18789/v1/chat/completions")
-CLAWDBOT_TOKEN = os.getenv("CLAWDBOT_TOKEN", "9bcbf88fde50f8c79d50e31f2f57e5f5a051d461fef8a6ad")
+CLAWDBOT_TOKEN = os.getenv("CLAWDBOT_TOKEN", "")
 
 # Whisper model (tiny for speed, base for accuracy)
 WHISPER_MODEL = os.getenv("WHISPER_MODEL", "tiny")
