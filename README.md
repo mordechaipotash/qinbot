@@ -13,9 +13,9 @@
 > 
 > Copy this page's URL and paste it into ChatGPT, Claude, or your favorite AI assistant. Ask it to explain QinBot at your level — whether you're curious about the concept, wondering if it's right for you, or want help setting it up.
 >
-> **Ready-to-use prompt:**
+> **Ready-to-use prompt (just copy & paste):**
 > ```
-> I'm reading about QinBot (paste URL or this README). I'm not very technical.
+> I'm reading about QinBot (https://github.com/mordechaipotash/qinbot). I'm not very technical.
 > Please explain:
 > 1. What this project does in simple terms
 > 2. Who it's for and why they'd want it
