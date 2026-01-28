@@ -6,6 +6,27 @@
 ![Platform](https://img.shields.io/badge/platform-Android%20(Qin%20F21)-green.svg)
 ![AI](https://img.shields.io/badge/AI-Claude%20%2F%20Clawdbot-purple.svg)
 
+---
+
+> [!TIP]
+> ### 🤖 Not technical? No problem!
+> 
+> Copy this page's URL and paste it into ChatGPT, Claude, or your favorite AI assistant. Ask it to explain QinBot at your level — whether you're curious about the concept, wondering if it's right for you, or want help setting it up.
+>
+> **Ready-to-use prompt:**
+> ```
+> I'm reading about QinBot (paste URL or this README). I'm not very technical.
+> Please explain:
+> 1. What this project does in simple terms
+> 2. Who it's for and why they'd want it
+> 3. What I'd need to set it up (in plain English)
+> 4. Whether this might work for my situation: [describe your needs]
+> 
+> Keep explanations simple. Ask me clarifying questions if needed.
+> ```
+
+---
+
 ## 🎯 The Problem
 
 Smartphones are designed to be addictive. For people who want to disconnect — whether for religious reasons, mental health, productivity, or digital minimalism — the choice has always been:
