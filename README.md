@@ -159,38 +159,38 @@ Brain MCP exposes **92 specialized tools** for querying your intellectual DNA:
 ```mermaid
 graph TB
     subgraph "Search & Discovery"
-        S1[semantic_search<br/>Conceptual similarity]
-        S2[search_conversations<br/>Full-text across 367K msgs]
-        S3[unified_search<br/>All sources at once]
-        S4[search_markdown<br/>5,524 documents]
+        S1[semantic_search - Conceptual similarity]
+        S2[search_conversations - Full-text across 367K msgs]
+        S3[unified_search - All sources at once]
+        S4[search_markdown - 5,524 documents]
     end
     
     subgraph "Self-Knowledge"
-        K1[what_do_i_think<br/>Synthesize your views]
-        K2[thinking_trajectory<br/>How ideas evolved]
-        K3[alignment_check<br/>Does this fit my principles?]
-        K4[find_precedent<br/>Similar past situations]
+        K1[what_do_i_think - Synthesize your views]
+        K2[thinking_trajectory - How ideas evolved]
+        K3[alignment_check - Does this fit my principles?]
+        K4[find_precedent - Similar past situations]
     end
     
     subgraph "Temporal Queries"
-        T1[what_was_i_thinking<br/>By month]
-        T2[first_mention<br/>When did I start?]
-        T3[concept_velocity<br/>Idea frequency over time]
-        T4[conversations_by_date<br/>What happened when]
+        T1[what_was_i_thinking - By month]
+        T2[first_mention - When did I start?]
+        T3[concept_velocity - Idea frequency over time]
+        T4[conversations_by_date - What happened when]
     end
     
     subgraph "Project Intelligence"
-        P1[github_project_timeline<br/>Commit history]
-        P2[code_to_conversation<br/>Link code to discussions]
-        P3[query_project_arcs<br/>Project narratives]
-        P4[get_open_todos<br/>Pending tasks]
+        P1[github_project_timeline - Commit history]
+        P2[code_to_conversation - Link code to discussions]
+        P3[query_project_arcs - Project narratives]
+        P4[get_open_todos - Pending tasks]
     end
     
     subgraph "Meta-Analysis"
-        M1[query_monthly_themes<br/>What dominated each month]
-        M2[query_intellectual_evolution<br/>How thinking changed]
-        M3[query_signature_phrases<br/>Your verbal patterns]
-        M4[query_mood<br/>Emotional patterns]
+        M1[query_monthly_themes - What dominated each month]
+        M2[query_intellectual_evolution - How thinking changed]
+        M3[query_signature_phrases - Your verbal patterns]
+        M4[query_mood - Emotional patterns]
     end
 ```
 
@@ -211,15 +211,15 @@ From your dumb phone, you can ask:
 ```mermaid
 graph LR
     subgraph "Qin Phone"
-        Q[Voice: "What was I<br/>thinking in April?"]
+        Q[Voice: "What was I - thinking in April?"]
     end
     
     subgraph "Mac Server"
         B[Bridge Server]
         G[Clawdbot Gateway]
-        MCP[Brain MCP Server<br/>Python + FastMCP]
-        DB[(SQLite<br/>367K messages)]
-        LANCE[(LanceDB<br/>107K embeddings)]
+        MCP[Brain MCP Server - Python + FastMCP]
+        DB[(SQLite - 367K messages)]
+        LANCE[(LanceDB - 107K embeddings)]
     end
     
     Q -->|HTTPS| B
@@ -254,19 +254,19 @@ graph TB
     end
     
     subgraph "Cloudflare Edge"
-        CF[Cloudflare Tunnel<br/>qin.yourdomain.com]
+        CF[Cloudflare Tunnel - qin.yourdomain.com]
     end
     
     subgraph "Mac (Home Server)"
-        BRIDGE[Qin Bridge Server<br/>Python :8081]
-        WHISPER[OpenAI Whisper<br/>Speech-to-Text]
-        CLAWDBOT[Clawdbot Gateway<br/>:18789]
+        BRIDGE[Qin Bridge Server - Python :8081]
+        WHISPER[OpenAI Whisper - Speech-to-Text]
+        CLAWDBOT[Clawdbot Gateway - :18789]
         TUNNEL[cloudflared daemon]
-        BRAIN[Brain MCP Server<br/>Personal Knowledge]
+        BRAIN[Brain MCP Server - Personal Knowledge]
     end
     
     subgraph "External APIs"
-        CLAUDE[Claude API<br/>Anthropic]
+        CLAUDE[Claude API - Anthropic]
         GMAIL[Gmail API]
         GCAL[Google Calendar]
         WEATHER[Weather API]
