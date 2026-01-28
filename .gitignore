@@ -1,0 +1,28 @@
+# Build outputs
+QinFeedback/app/build/
+QinFeedback/build/
+QinFeedback/.gradle/
+*.apk
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.env
+venv/
+
+# Logs
+*.log
+*.err
+
+# Secrets (don't commit tokens!)
+# Note: For production, use environment variables instead of hardcoding tokens
