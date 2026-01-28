@@ -119,72 +119,127 @@ stateDiagram-v2
 
 ---
 
-## 🧠 Brain MCP: Personal Knowledge Integration
+## 🧠 Brain MCP: Your Intellectual DNA
 
 ### What is Brain MCP?
 
-QinBot can query your **personal knowledge base** through the Brain MCP (Model Context Protocol) server. This is a searchable database of:
+Brain MCP is a **queryable archive of your entire intellectual history** — every conversation, every search, every project, every decision. It's not just storage; it's a system that understands *how you think*.
 
-- **367,000+ messages** from conversations
-- **107,000+ embeddings** for semantic search
-- Personal notes, decisions, and context
-- Project history and documentation
+**The Real Numbers:**
 
-### How It Works
+| Source | Count |
+|--------|-------|
+| **Conversations** | 367,684 messages (132,815 from user) |
+| **Embeddings** | 107,682 semantic vectors (768-dimensional, LanceDB) |
+| **GitHub** | 132 repositories, 1,427 commits |
+| **YouTube** | 31,832 videos tracked (16,386 watched) |
+| **Google Searches** | 52,791 queries |
+| **Google Visits** | 58,650 page visits |
+| **Markdown Docs** | 5,524 documents |
+
+### The 8 Universal Principles (SEED)
+
+Brain MCP has extracted **8 foundational mental models** from analyzing hundreds of thousands of messages:
+
+| Principle | Description | Mentions |
+|-----------|-------------|----------|
+| **INVERSION** | Reverse the problem to find the solution | 1,415 |
+| **TRANSLATION LAYER** | Interface between infinite AI output and finite human comprehension | 610 |
+| **COMPRESSION** | Reduce complexity while preserving decision quality | 594 |
+| **AGENCY PRESERVATION** | 100% human decision control, 100% machine execution | 395 |
+| **TEMPORAL ECONOMICS** | Human time as the ultimate scarce resource | 71 |
+| **BOTTLENECK AMPLIFICATION** | Find constraints and amplify them as leverage | 57 |
+| **COGNITIVE ARCHITECTURE** | Design systems that amplify YOUR specific mind | 18 |
+| **SEEDS & SOVEREIGNTY** | Autonomous, bounded systems with clear interfaces | 17 |
+
+### 92 Query Tools
+
+Brain MCP exposes **92 specialized tools** for querying your intellectual DNA:
+
+```mermaid
+graph TB
+    subgraph "Search & Discovery"
+        S1[semantic_search<br/>Conceptual similarity]
+        S2[search_conversations<br/>Full-text across 367K msgs]
+        S3[unified_search<br/>All sources at once]
+        S4[search_markdown<br/>5,524 documents]
+    end
+    
+    subgraph "Self-Knowledge"
+        K1[what_do_i_think<br/>Synthesize your views]
+        K2[thinking_trajectory<br/>How ideas evolved]
+        K3[alignment_check<br/>Does this fit my principles?]
+        K4[find_precedent<br/>Similar past situations]
+    end
+    
+    subgraph "Temporal Queries"
+        T1[what_was_i_thinking<br/>By month]
+        T2[first_mention<br/>When did I start?]
+        T3[concept_velocity<br/>Idea frequency over time]
+        T4[conversations_by_date<br/>What happened when]
+    end
+    
+    subgraph "Project Intelligence"
+        P1[github_project_timeline<br/>Commit history]
+        P2[code_to_conversation<br/>Link code to discussions]
+        P3[query_project_arcs<br/>Project narratives]
+        P4[get_open_todos<br/>Pending tasks]
+    end
+    
+    subgraph "Meta-Analysis"
+        M1[query_monthly_themes<br/>What dominated each month]
+        M2[query_intellectual_evolution<br/>How thinking changed]
+        M3[query_signature_phrases<br/>Your verbal patterns]
+        M4[query_mood<br/>Emotional patterns]
+    end
+```
+
+### Example Queries from Qin
+
+From your dumb phone, you can ask:
+
+| Query | What Brain MCP Does |
+|-------|---------------------|
+| *"What do I think about AI agents?"* | Synthesizes your views from 1,415 mentions of agency/agents |
+| *"When did I first work on MCP?"* | Finds earliest mention across all conversations |
+| *"Am I being consistent with my principles?"* | Runs alignment_check against SEED principles |
+| *"What was I obsessed with in October?"* | Pulls monthly themes and focus areas |
+| *"Find similar situations to this decision"* | Semantic search for precedents |
+
+### Architecture
 
 ```mermaid
 graph LR
     subgraph "Qin Phone"
-        Q[QinBot App]
+        Q[Voice: "What was I<br/>thinking in April?"]
     end
     
-    subgraph "Bridge + Gateway"
+    subgraph "Mac Server"
         B[Bridge Server]
         G[Clawdbot Gateway]
+        MCP[Brain MCP Server<br/>Python + FastMCP]
+        DB[(SQLite<br/>367K messages)]
+        LANCE[(LanceDB<br/>107K embeddings)]
     end
     
-    subgraph "Brain MCP"
-        MCP[MCP Server]
-        DB[(SQLite DB)]
-        EMB[(Embeddings)]
-    end
-    
-    Q -->|Voice Query| B
+    Q -->|HTTPS| B
     B -->|API| G
-    G -->|Tool Call| MCP
-    MCP -->|Search| DB
-    MCP -->|Semantic| EMB
+    G -->|MCP Tool Call| MCP
+    MCP -->|SQL| DB
+    MCP -->|Vector Search| LANCE
     MCP -->|Results| G
-    G -->|Response| B
-    B -->|Text| Q
+    G -->|Natural Language| B
+    B -->|Plain Text| Q
 ```
 
-### Example Queries
+### Privacy & Sovereignty
 
-From your Qin, you can ask:
+- **100% Local**: Brain MCP runs on YOUR Mac. Nothing uploaded to cloud.
+- **You Own Your Data**: SQLite + LanceDB files you can backup, export, delete.
+- **AI Queries Locally**: Claude sees query results, not raw data.
+- **Offline Capable**: Brain queries work even without internet (only AI response needs connection).
 
-- *"What was I working on last week?"*
-- *"Find my notes about the tax project"*
-- *"What did I decide about the API architecture?"*
-- *"Search my conversations for discussions about pricing"*
-
-The AI uses the Brain MCP to search your personal history and provide contextual answers.
-
-### Brain MCP Tools
-
-The MCP server exposes 92 tools including:
-
-| Tool | Description |
-|------|-------------|
-| `semantic_search` | Find conceptually similar messages |
-| `what_do_i_think` | Synthesize your views on a topic |
-| `thinking_trajectory` | Track how an idea evolved |
-| `find_precedent` | Find similar past situations |
-| `unified_search` | Search across all sources |
-
-### Privacy Note
-
-Brain MCP runs **locally on your Mac**. Your personal data never leaves your machine — the AI queries it through local tool calls, not cloud APIs.
+This is the **"Intellectual DNA"** concept — your thoughts, patterns, and decisions are searchable and queryable, turning years of scattered conversations into a coherent, accessible knowledge base.
 
 ---
 
