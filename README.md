@@ -87,16 +87,16 @@ The AI handles the rest — understanding context, executing actions, and respon
 ```mermaid
 stateDiagram-v2
     [*] --> Menu: Launch App
-    Menu --> VoicePrompt: Press 5 (Chat)
-    VoicePrompt --> Recording: Press 1 (Start)
-    Recording --> Confirm: Press 1 (Stop)
-    Confirm --> Sending: Press 2 (Send)
-    Confirm --> Recording: Press 3 (Redo)
-    Confirm --> Menu: Press 0 (Cancel)
+    Menu --> VoicePrompt: Press 5 Chat
+    VoicePrompt --> Recording: Press 1 Start
+    Recording --> Confirm: Press 1 Stop
+    Confirm --> Sending: Press 2 Send
+    Confirm --> Recording: Press 3 Redo
+    Confirm --> Menu: Press 0 Cancel
     Sending --> Response: AI Responds
     Response --> Menu: Press 0
     Response --> VoicePrompt: Press 5
-    Response --> Sending: Press [1-9] (Follow-up)
+    Response --> Sending: Press 1 to 9 Followup
 ```
 
 **Step-by-step:**
@@ -158,39 +158,39 @@ Brain MCP exposes **92 specialized tools** for querying your intellectual DNA:
 
 ```mermaid
 graph TB
-    subgraph "Search & Discovery"
-        S1[semantic_search - Conceptual similarity]
-        S2[search_conversations - Full-text across 367K msgs]
-        S3[unified_search - All sources at once]
-        S4[search_markdown - 5,524 documents]
+    subgraph SearchDiscovery["Search & Discovery"]
+        S1["semantic_search: Conceptual similarity"]
+        S2["search_conversations: Full-text across 367K msgs"]
+        S3["unified_search: All sources at once"]
+        S4["search_markdown: 5,524 documents"]
     end
     
-    subgraph "Self-Knowledge"
-        K1[what_do_i_think - Synthesize your views]
-        K2[thinking_trajectory - How ideas evolved]
-        K3[alignment_check - Does this fit my principles?]
-        K4[find_precedent - Similar past situations]
+    subgraph SelfKnowledge["Self-Knowledge"]
+        K1["what_do_i_think: Synthesize your views"]
+        K2["thinking_trajectory: How ideas evolved"]
+        K3["alignment_check: Does this fit my principles"]
+        K4["find_precedent: Similar past situations"]
     end
     
-    subgraph "Temporal Queries"
-        T1[what_was_i_thinking - By month]
-        T2[first_mention - When did I start?]
-        T3[concept_velocity - Idea frequency over time]
-        T4[conversations_by_date - What happened when]
+    subgraph TemporalQueries["Temporal Queries"]
+        T1["what_was_i_thinking: By month"]
+        T2["first_mention: When did I start"]
+        T3["concept_velocity: Idea frequency over time"]
+        T4["conversations_by_date: What happened when"]
     end
     
-    subgraph "Project Intelligence"
-        P1[github_project_timeline - Commit history]
-        P2[code_to_conversation - Link code to discussions]
-        P3[query_project_arcs - Project narratives]
-        P4[get_open_todos - Pending tasks]
+    subgraph ProjectIntelligence["Project Intelligence"]
+        P1["github_project_timeline: Commit history"]
+        P2["code_to_conversation: Link code to discussions"]
+        P3["query_project_arcs: Project narratives"]
+        P4["get_open_todos: Pending tasks"]
     end
     
-    subgraph "Meta-Analysis"
-        M1[query_monthly_themes - What dominated each month]
-        M2[query_intellectual_evolution - How thinking changed]
-        M3[query_signature_phrases - Your verbal patterns]
-        M4[query_mood - Emotional patterns]
+    subgraph MetaAnalysis["Meta-Analysis"]
+        M1["query_monthly_themes: What dominated each month"]
+        M2["query_intellectual_evolution: How thinking changed"]
+        M3["query_signature_phrases: Your verbal patterns"]
+        M4["query_mood: Emotional patterns"]
     end
 ```
 
@@ -210,16 +210,16 @@ From your dumb phone, you can ask:
 
 ```mermaid
 graph LR
-    subgraph "Qin Phone"
-        Q[Voice: "What was I - thinking in April?"]
+    subgraph QinPhone["Qin Phone"]
+        Q["Voice: What was I thinking in April?"]
     end
     
-    subgraph "Mac Server"
+    subgraph MacServer["Mac Server"]
         B[Bridge Server]
         G[Clawdbot Gateway]
-        MCP[Brain MCP Server - Python + FastMCP]
-        DB[(SQLite - 367K messages)]
-        LANCE[(LanceDB - 107K embeddings)]
+        MCP["Brain MCP Server"]
+        DB[("SQLite: 367K messages")]
+        LANCE[("LanceDB: 107K embeddings")]
     end
     
     Q -->|HTTPS| B
@@ -247,26 +247,26 @@ This is the **"Intellectual DNA"** concept — your thoughts, patterns, and deci
 
 ```mermaid
 graph TB
-    subgraph "Qin F21 Phone"
+    subgraph QinPhone["Qin F21 Phone"]
         QIN[QinBot Android App]
         MIC[Microphone]
         KB[Physical Keyboard]
     end
     
-    subgraph "Cloudflare Edge"
-        CF[Cloudflare Tunnel - qin.yourdomain.com]
+    subgraph CloudflareEdge["Cloudflare Edge"]
+        CF["Cloudflare Tunnel: qin.yourdomain.com"]
     end
     
-    subgraph "Mac (Home Server)"
-        BRIDGE[Qin Bridge Server - Python :8081]
-        WHISPER[OpenAI Whisper - Speech-to-Text]
-        CLAWDBOT[Clawdbot Gateway - :18789]
+    subgraph MacServer["Mac Home Server"]
+        BRIDGE["Qin Bridge Server: Python :8081"]
+        WHISPER["OpenAI Whisper: Speech to Text"]
+        CLAWDBOT["Clawdbot Gateway: :18789"]
         TUNNEL[cloudflared daemon]
-        BRAIN[Brain MCP Server - Personal Knowledge]
+        BRAIN["Brain MCP Server: Personal Knowledge"]
     end
     
-    subgraph "External APIs"
-        CLAUDE[Claude API - Anthropic]
+    subgraph ExternalAPIs["External APIs"]
+        CLAUDE["Claude API: Anthropic"]
         GMAIL[Gmail API]
         GCAL[Google Calendar]
         WEATHER[Weather API]
@@ -279,7 +279,7 @@ graph TB
     TUNNEL <--> BRIDGE
     BRIDGE -->|WAV Audio| WHISPER
     WHISPER -->|Transcript| BRIDGE
-    BRIDGE <-->|OpenAI-compatible API| CLAWDBOT
+    BRIDGE <-->|OpenAI API| CLAWDBOT
     CLAWDBOT <-->|Messages API| CLAUDE
     CLAWDBOT <-->|MCP Protocol| BRAIN
     CLAWDBOT --> GMAIL
@@ -298,54 +298,54 @@ sequenceDiagram
     participant W as Whisper
     participant G as Clawdbot Gateway
     participant AI as Claude AI
-    participant T as Tools (Email, etc.)
+    participant T as Tools
     
-    Note over U,Q: Instant Action Flow (e.g., Weather)
-    U->>Q: Press "4" (Weather)
-    Q->>C: POST /action {action: "4"}
+    Note over U,Q: Instant Action Flow
+    U->>Q: Press 4 Weather
+    Q->>C: POST /action
     C->>B: Tunnel forward
     B->>G: POST /v1/chat/completions
-    G->>AI: "What's the weather?"
-    AI->>G: Tool call: get_weather()
+    G->>AI: Whats the weather
+    AI->>G: Tool call get_weather
     G->>T: Execute tool
     T->>G: Weather data
     G->>AI: Tool result
     AI->>G: Formatted response
     G->>B: JSON response
-    B->>B: strip_markdown()
+    B->>B: strip_markdown
     B->>C: Clean text response
     C->>Q: Response
-    Q->>Q: Parse [1] [2] [3] options
-    Q->>U: Display + menu
+    Q->>Q: Parse numbered options
+    Q->>U: Display menu
     
     Note over U,Q: Voice Flow
-    U->>Q: Press "5" (Chat)
-    Q->>U: "What do you want to say?"
-    U->>Q: Press "1" (Start recording)
-    Q->>Q: MediaRecorder.start()
-    U->>Q: Speak: "Check my emails"
-    U->>Q: Press "1" (Stop recording)
-    Q->>Q: MediaRecorder.stop()
-    Q->>C: POST /audio (3GP binary)
+    U->>Q: Press 5 Chat
+    Q->>U: What do you want to say
+    U->>Q: Press 1 Start recording
+    Q->>Q: MediaRecorder.start
+    U->>Q: Speak Check my emails
+    U->>Q: Press 1 Stop recording
+    Q->>Q: MediaRecorder.stop
+    Q->>C: POST /audio 3GP binary
     C->>B: Audio data
-    B->>B: FFmpeg: 3GP → WAV
+    B->>B: FFmpeg 3GP to WAV
     B->>W: whisper audio.wav
-    W->>B: "Check my emails"
-    B->>C: {transcript: "Check my emails"}
+    W->>B: Check my emails
+    B->>C: transcript
     C->>Q: Transcript
-    Q->>U: "You: Check my emails"
-    Q->>U: "2=Send 3=Redo 0=Cancel"
-    U->>Q: Press "2" (Send)
-    Q->>C: POST /chat {text: "Check my emails"}
+    Q->>U: You Check my emails
+    Q->>U: 2 Send 3 Redo 0 Cancel
+    U->>Q: Press 2 Send
+    Q->>C: POST /chat
     C->>B: Forward
     B->>G: POST /v1/chat/completions
     G->>AI: User query
     AI->>G: Response with options
     G->>B: Response
-    B->>B: strip_markdown()
+    B->>B: strip_markdown
     B->>C: Clean response
     C->>Q: Response
-    Q->>U: Email summary + [1] [2] [3]
+    Q->>U: Email summary with options
 ```
 
 ---
