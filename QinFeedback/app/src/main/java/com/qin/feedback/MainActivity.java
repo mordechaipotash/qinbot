@@ -181,7 +181,7 @@ public class MainActivity extends Activity {
                 try {
                     URL url = new URL(MENU_URL);
                     HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                    conn.setConnectTimeout(5000);
+                    conn.setConnectTimeout(15000);
                     conn.setReadTimeout(5000);
 
                     if (conn.getResponseCode() == 200) {
@@ -568,7 +568,7 @@ public class MainActivity extends Activity {
                     conn.setRequestMethod("POST");
                     conn.setRequestProperty("Content-Type", "audio/3gpp");
                     conn.setRequestProperty("X-Transcribe-Only", "true");
-                    conn.setConnectTimeout(10000);
+                    conn.setConnectTimeout(15000);
                     conn.setReadTimeout(60000);
 
                     OutputStream os = conn.getOutputStream();
@@ -698,7 +698,7 @@ public class MainActivity extends Activity {
                     conn.setRequestMethod("POST");
                     conn.setRequestProperty("Content-Type", "audio/3gpp");
                     conn.setRequestProperty("X-Transcribe-Only", "true");
-                    conn.setConnectTimeout(10000);
+                    conn.setConnectTimeout(15000);
                     conn.setReadTimeout(60000);
 
                     OutputStream os = conn.getOutputStream();
@@ -769,7 +769,7 @@ public class MainActivity extends Activity {
                     conn = (HttpURLConnection) url.openConnection();
                     conn.setRequestMethod("POST");
                     conn.setRequestProperty("Content-Type", "application/json");
-                    conn.setConnectTimeout(5000);
+                    conn.setConnectTimeout(15000);
                     conn.setReadTimeout(120000);
                     conn.setDoOutput(true);
 
@@ -827,7 +827,7 @@ public class MainActivity extends Activity {
                     conn = (HttpURLConnection) url.openConnection();
                     conn.setRequestMethod("POST");
                     conn.setRequestProperty("Content-Type", "application/json");
-                    conn.setConnectTimeout(5000);
+                    conn.setConnectTimeout(15000);
                     conn.setReadTimeout(120000);
                     conn.setDoOutput(true);
 
@@ -881,7 +881,7 @@ public class MainActivity extends Activity {
                     conn = (HttpURLConnection) url.openConnection();
                     conn.setRequestMethod("POST");
                     conn.setRequestProperty("Content-Type", "application/json");
-                    conn.setConnectTimeout(5000);
+                    conn.setConnectTimeout(15000);
                     conn.setReadTimeout(120000);
                     conn.setDoOutput(true);
 
