@@ -75,54 +75,45 @@ PORT = 8081
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # MENU CONFIGURATION - Edit this to add/change quick actions!
+# Fixed items (1-3) are hardcoded in the app. Only 4-9 are dynamic from server.
 # ═══════════════════════════════════════════════════════════════════════════════
 MENU_CONFIG = {
     "title": "🤖 QinBot",
+    "fixed": {
+        "1": {"label": "🎤 Voice", "type": "voice"},
+        "2": {"label": "🎯 Focus", "type": "instant"},
+        "3": {"label": "📰 News", "type": "instant"}
+    },
     "items": {
-        "1": {
-            "label": "🎯 Focus",
-            "type": "instant",
-            "command": "What have I been focused on the last few days? Give me a brief summary of my current projects, priorities, and momentum. Check memory files and recent context."
-        },
-        "2": {
+        "4": {
             "label": "📧 Emails", 
             "type": "instant",
             "command": "Check my emails. Summarize any unread messages briefly - who from, subject, urgency. Use gog skill."
         },
-        "3": {
+        "5": {
             "label": "📅 Calendar",
             "type": "instant", 
             "command": "What's on my calendar today and tomorrow? Any upcoming events I should know about?"
         },
-        "4": {
+        "6": {
             "label": "🌤️ Weather",
             "type": "instant",
             "command": "What's the weather like today and tomorrow in my location?"
         },
-        "5": {
-            "label": "🎤 Chat",
-            "type": "voice",
-            "prompt": "What do you want to say?"
-        },
-        "6": {
+        "7": {
             "label": "⏰ Remind",
             "type": "voice",
             "prompt": "What should I remind you about?"
         },
-        "7": {
+        "8": {
             "label": "📝 Note",
             "type": "voice",
             "prompt": "What do you want to note?"
         },
-        "8": {
+        "9": {
             "label": "🔍 Search",
             "type": "voice",
             "prompt": "What do you want to search?"
-        },
-        "9": {
-            "label": "📰 News",
-            "type": "instant",
-            "command": "Give me a quick 30-second AI and tech news briefing. What's happening today?"
         }
     }
 }

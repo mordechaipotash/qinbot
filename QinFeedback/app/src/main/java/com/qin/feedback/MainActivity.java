@@ -236,16 +236,14 @@ public class MainActivity extends Activity {
     }
 
     private void setupDefaultMenu() {
+        // Only 4-9 are dynamic (1-3 are fixed in code)
         String[][] defaults = {
-            {"1", "🎯 Focus", "instant"},
-            {"2", "📧 Emails", "instant"},
-            {"3", "📅 Calendar", "instant"},
-            {"4", "🌤️ Weather", "instant"},
-            {"5", "🎤 Chat", "voice"},
-            {"6", "⏰ Remind", "voice"},
-            {"7", "📝 Note", "voice"},
-            {"8", "🔍 Search", "voice"},
-            {"9", "📰 News", "instant"}
+            {"4", "📧 Emails", "instant"},
+            {"5", "📅 Calendar", "instant"},
+            {"6", "🌤️ Weather", "instant"},
+            {"7", "⏰ Remind", "voice"},
+            {"8", "📝 Note", "voice"},
+            {"9", "🔍 Search", "voice"}
         };
         for (String[] d : defaults) {
             MenuItem mi = new MenuItem();
@@ -258,7 +256,15 @@ public class MainActivity extends Activity {
     private void showMainMenu() {
         stopSpeaking();  // Stop any TTS when returning to menu
         StringBuilder sb = new StringBuilder();
-        for (int i = 1; i <= 9; i++) {
+        
+        // Fixed items first (1-3)
+        sb.append("1: 🎤 Voice\n");
+        sb.append("2: 🎯 Focus\n");
+        sb.append("3: 📰 News\n");
+        sb.append("───────────\n");
+        
+        // Dynamic items (4-9) from server
+        for (int i = 4; i <= 9; i++) {
             String key = String.valueOf(i);
             if (menuItems.containsKey(key)) {
                 sb.append(key).append(": ").append(menuItems.get(key).label).append("\n");
@@ -267,10 +273,12 @@ public class MainActivity extends Activity {
         sb.append("0: Exit");
         
         // Restore header elements
+        String ttsStatus = ttsEnabled ? "🔊" : "🔇";
+        titleText.setText(ttsStatus + " QinBot");
         titleText.setVisibility(View.VISIBLE);
         menuText.setText(sb.toString());
         menuText.setVisibility(View.VISIBLE);
-        statusText.setText("Press 1-9");
+        statusText.setText("*=TTS  1-9=Select");
         statusText.setTextColor(Color.GREEN);
         statusText.setTextSize(22);  // Restore normal size
         optionsText.setText("");
@@ -339,6 +347,42 @@ public class MainActivity extends Activity {
     }
 
     private boolean handleMenuKey(String key) {
+        // * key = toggle TTS from menu
+        if (key.equals("*")) {
+            toggleTts();
+            // Update title with new TTS status
+            String ttsStatus = ttsEnabled ? "🔊" : "🔇";
+            titleText.setText(ttsStatus + " QinBot");
+            return true;
+        }
+        
+        // FIXED ITEMS (1-3)
+        if (key.equals("1")) {
+            // Voice - go to voice input
+            clearResponseArea();
+            menuText.setVisibility(View.GONE);
+            statusText.setText("Press 1 to speak");
+            statusText.setTextColor(Color.CYAN);
+            currentState = STATE_VOICE_PROMPT;
+            pendingAction = "chat";
+            return true;
+        }
+        if (key.equals("2")) {
+            // Focus - instant command
+            clearResponseArea();
+            pendingAction = "2";
+            sendChat("What have I been focused on the last few days? Give me a brief summary of my current projects, priorities, and momentum. Check memory files and recent context.");
+            return true;
+        }
+        if (key.equals("3")) {
+            // News - instant command
+            clearResponseArea();
+            pendingAction = "3";
+            sendChat("Give me a quick 30-second AI and tech news briefing. What's happening today?");
+            return true;
+        }
+        
+        // DYNAMIC ITEMS (4-9) from server
         if (menuItems.containsKey(key)) {
             MenuItem item = menuItems.get(key);
             
