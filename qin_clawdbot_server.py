@@ -217,11 +217,14 @@ class QinHandler(BaseHTTPRequestHandler):
             action_key = data.get("action")
             voice_input = data.get("voice_input", "")
             
-            if action_key not in MENU_CONFIG["items"]:
+            # Get dynamic menu items (uses cache)
+            dynamic_items = generate_dynamic_menu()
+            
+            if action_key not in dynamic_items:
                 self.send_json({"error": f"Unknown action: {action_key}"}, status=400)
                 return
             
-            item = MENU_CONFIG["items"][action_key]
+            item = dynamic_items[action_key]
             
             if item["type"] == "instant":
                 # Direct command
