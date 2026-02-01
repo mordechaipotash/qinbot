@@ -932,6 +932,7 @@ public class MainActivity extends Activity {
         currentState = STATE_RESPONSE;
     }
 
+    @SuppressWarnings("deprecation")
     private void speakResponse(String text) {
         if (!ttsEnabled || !ttsReady || tts == null) return;
         
@@ -945,8 +946,8 @@ public class MainActivity extends Activity {
             .replaceAll("\\s+", " ")            // Collapse whitespace
             .trim();
         
-        // Speak immediately
-        tts.speak(cleanText, TextToSpeech.QUEUE_FLUSH, null, "response");
+        // Speak immediately (using deprecated API for older Android)
+        tts.speak(cleanText, TextToSpeech.QUEUE_FLUSH, null);
     }
     
     private void stopSpeaking() {
