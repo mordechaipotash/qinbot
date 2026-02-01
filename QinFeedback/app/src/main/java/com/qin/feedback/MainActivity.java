@@ -11,6 +11,8 @@ import android.graphics.Color;
 import android.view.Gravity;
 import android.widget.LinearLayout;
 import android.media.MediaRecorder;
+import android.speech.tts.TextToSpeech;
+import java.util.Locale;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.io.OutputStream;
@@ -42,6 +44,11 @@ public class MainActivity extends Activity {
     private String audioFilePath;
     private String lastTranscript = "";
     private static final int MAX_RECORDING_SECONDS = 30;
+    
+    // Text-to-Speech
+    private TextToSpeech tts;
+    private boolean ttsReady = false;
+    private boolean ttsEnabled = true;  // Toggle with * key
 
     // States
     private static final int STATE_MENU = 0;
@@ -155,6 +162,15 @@ public class MainActivity extends Activity {
         setContentView(layout);
         audioFilePath = getFilesDir().getAbsolutePath() + "/voice.3gp";
 
+        // Initialize Text-to-Speech
+        tts = new TextToSpeech(this, status -> {
+            if (status == TextToSpeech.SUCCESS) {
+                tts.setLanguage(Locale.US);
+                tts.setSpeechRate(1.1f);  // Slightly faster
+                ttsReady = true;
+            }
+        });
+
         loadMenu();
     }
 
@@ -240,6 +256,7 @@ public class MainActivity extends Activity {
     }
 
     private void showMainMenu() {
+        stopSpeaking();  // Stop any TTS when returning to menu
         StringBuilder sb = new StringBuilder();
         for (int i = 1; i <= 9; i++) {
             String key = String.valueOf(i);
@@ -312,6 +329,12 @@ public class MainActivity extends Activity {
         if (keyCode >= 144 && keyCode <= 153) {
             return String.valueOf(keyCode - 144);
         }
+        if (keyCode == KeyEvent.KEYCODE_STAR) {
+            return "*";
+        }
+        if (keyCode == KeyEvent.KEYCODE_POUND) {
+            return "#";
+        }
         return "";
     }
 
@@ -354,13 +377,30 @@ public class MainActivity extends Activity {
         // Check if this key has a dynamic option
         if (dynamicOptions.containsKey(key)) {
             String optionText = dynamicOptions.get(key);
-            // Send the option as a follow-up command
+            stopSpeaking();  // Stop TTS when selecting option
             sendFollowUp(optionText);
             return true;
         }
         
-        // * key = voice input in response context
-        if (key.equals("*") || key.equals("5")) {
+        // * key = toggle TTS
+        if (key.equals("*")) {
+            toggleTts();
+            return true;
+        }
+        
+        // # key = repeat last response
+        if (key.equals("#")) {
+            String text = responseText.getText().toString();
+            if (!text.isEmpty()) {
+                ttsEnabled = true;  // Force enable for repeat
+                speakResponse(text);
+            }
+            return true;
+        }
+        
+        // 5 key = voice input in response context
+        if (key.equals("5")) {
+            stopSpeaking();
             menuText.setVisibility(View.GONE);
             statusText.setText("Press 1 to speak");
             statusText.setTextColor(Color.CYAN);
@@ -864,17 +904,21 @@ public class MainActivity extends Activity {
         
         responseText.setText(mainText);
         
+        // Speak the response immediately (speed is priority)
+        speakResponse(mainText);
+        
         // Hide header elements to maximize response space
         titleText.setVisibility(View.GONE);
         menuText.setVisibility(View.GONE);
         
+        String ttsStatus = ttsEnabled ? "🔊" : "🔇";
         if (hasDynamicOptions) {
             optionsText.setText(optionsSb.toString().trim());
             optionsText.setVisibility(View.VISIBLE);
-            statusText.setText("0=Menu  5=Voice");
+            statusText.setText(ttsStatus + " 0=Menu 5=Voice *=TTS");
         } else {
             optionsText.setVisibility(View.GONE);
-            statusText.setText("0=Menu  5=Voice");
+            statusText.setText(ttsStatus + " 0=Menu 5=Voice *=TTS");
         }
         
         statusText.setTextColor(Color.GREEN);
@@ -888,6 +932,40 @@ public class MainActivity extends Activity {
         currentState = STATE_RESPONSE;
     }
 
+    private void speakResponse(String text) {
+        if (!ttsEnabled || !ttsReady || tts == null) return;
+        
+        // Stop any current speech
+        tts.stop();
+        
+        // Clean text for speech (remove excessive formatting)
+        String cleanText = text
+            .replaceAll("\\n+", ". ")           // Newlines to pauses
+            .replaceAll("[\\[\\]\\|\\-]{2,}", " ")  // Remove table chars
+            .replaceAll("\\s+", " ")            // Collapse whitespace
+            .trim();
+        
+        // Speak immediately
+        tts.speak(cleanText, TextToSpeech.QUEUE_FLUSH, null, "response");
+    }
+    
+    private void stopSpeaking() {
+        if (tts != null) {
+            tts.stop();
+        }
+    }
+    
+    private void toggleTts() {
+        ttsEnabled = !ttsEnabled;
+        stopSpeaking();
+        String status = ttsEnabled ? "🔊 TTS ON" : "🔇 TTS OFF";
+        statusText.setText(status);
+        statusText.postDelayed(() -> {
+            String ttsStatus = ttsEnabled ? "🔊" : "🔇";
+            statusText.setText(ttsStatus + " 0=Menu 5=Voice *=TTS");
+        }, 1000);
+    }
+
     private void showMainMenuDelayed() {
         statusText.postDelayed(() -> showMainMenu(), 3000);
     }
@@ -896,5 +974,9 @@ public class MainActivity extends Activity {
     protected void onDestroy() {
         super.onDestroy();
         if (isRecording) stopRecording();
+        if (tts != null) {
+            tts.stop();
+            tts.shutdown();
+        }
     }
 }
