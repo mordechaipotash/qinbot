@@ -95,7 +95,7 @@ public class MainActivity extends Activity {
         titleText = new TextView(this);
         titleText.setText("🤖 QinBot");
         titleText.setTextColor(Color.parseColor("#00d4ff"));
-        titleText.setTextSize(24);
+        titleText.setTextSize(28);
         titleText.setGravity(Gravity.CENTER);
         layout.addView(titleText);
 
@@ -103,7 +103,7 @@ public class MainActivity extends Activity {
         menuText = new TextView(this);
         menuText.setText("Loading...");
         menuText.setTextColor(Color.WHITE);
-        menuText.setTextSize(14);
+        menuText.setTextSize(20);
         menuText.setPadding(8, 12, 8, 12);
         layout.addView(menuText);
 
@@ -111,7 +111,7 @@ public class MainActivity extends Activity {
         statusText = new TextView(this);
         statusText.setText("");
         statusText.setTextColor(Color.GREEN);
-        statusText.setTextSize(16);
+        statusText.setTextSize(22);
         statusText.setGravity(Gravity.CENTER);
         statusText.setPadding(0, 8, 0, 8);
         layout.addView(statusText);
@@ -120,7 +120,7 @@ public class MainActivity extends Activity {
         transcriptText = new TextView(this);
         transcriptText.setText("");
         transcriptText.setTextColor(Color.parseColor("#ffcc00"));
-        transcriptText.setTextSize(13);
+        transcriptText.setTextSize(18);
         transcriptText.setPadding(8, 4, 8, 4);
         layout.addView(transcriptText);
 
@@ -138,14 +138,14 @@ public class MainActivity extends Activity {
         responseText = new TextView(this);
         responseText.setText("");
         responseText.setTextColor(Color.WHITE);
-        responseText.setTextSize(18);
+        responseText.setTextSize(22);
         responseContainer.addView(responseText);
 
         // Dynamic options (highlighted)
         optionsText = new TextView(this);
         optionsText.setText("");
         optionsText.setTextColor(Color.parseColor("#00ff88"));
-        optionsText.setTextSize(14);
+        optionsText.setTextSize(20);
         optionsText.setPadding(0, 12, 0, 0);
         responseContainer.addView(optionsText);
 
@@ -255,7 +255,7 @@ public class MainActivity extends Activity {
         menuText.setVisibility(View.VISIBLE);
         statusText.setText("Press 1-9");
         statusText.setTextColor(Color.GREEN);
-        statusText.setTextSize(16);  // Restore normal size
+        statusText.setTextSize(22);  // Restore normal size
         optionsText.setText("");
         dynamicOptions.clear();
         hasDynamicOptions = false;
@@ -878,7 +878,7 @@ public class MainActivity extends Activity {
         }
         
         statusText.setTextColor(Color.GREEN);
-        statusText.setTextSize(12);  // Smaller status text
+        statusText.setTextSize(18);  // Smaller status text in response view
         responseScroll.post(() -> responseScroll.fullScroll(View.FOCUS_UP));
 
         pendingAction = null;
