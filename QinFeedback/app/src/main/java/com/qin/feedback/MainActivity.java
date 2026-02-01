@@ -120,7 +120,7 @@ public class MainActivity extends Activity {
         transcriptText = new TextView(this);
         transcriptText.setText("");
         transcriptText.setTextColor(Color.parseColor("#ffcc00"));
-        transcriptText.setTextSize(18);
+        transcriptText.setTextSize(22);
         transcriptText.setPadding(8, 4, 8, 4);
         layout.addView(transcriptText);
 
