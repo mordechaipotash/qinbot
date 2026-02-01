@@ -1,0 +1,21 @@
+# Build artifacts
+app/build/
+build/
+*.class
+*.dex
+*.idsig
+
+# IDE
+.idea/
+*.iml
+.gradle/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Local config
+.env
