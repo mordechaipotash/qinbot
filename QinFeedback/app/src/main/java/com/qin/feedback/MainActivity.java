@@ -22,12 +22,17 @@ import java.io.FileInputStream;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.IOException;
+import java.io.FileOutputStream;
 import org.json.JSONObject;
+import org.json.JSONArray;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+import android.os.Environment;
 
 public class MainActivity extends Activity {
 
@@ -58,7 +63,14 @@ public class MainActivity extends Activity {
     private static final int STATE_VOICE_PROMPT = 4;
     private static final int STATE_RESPONSE = 5;  // New: viewing response with dynamic options
     private static final int STATE_RECORDING_APPEND = 6;  // Recording to append to existing transcript
+    private static final int STATE_DOWNLOAD_LIST = 7;     // Viewing downloadable files
+    private static final int STATE_DOWNLOADING = 8;        // Download in progress
     private int currentState = STATE_MENU;
+    
+    // Download state
+    private List<JSONObject> downloadFileList = new ArrayList<>();
+    private int downloadPage = 0;
+    private static final int FILES_PER_PAGE = 9;
 
     // Server
     private static final String SERVER_BASE = "https://qin.mordechaipotash.com";
@@ -66,6 +78,7 @@ public class MainActivity extends Activity {
     private static final String ACTION_URL = SERVER_BASE + "/action";
     private static final String AUDIO_URL = SERVER_BASE + "/audio";
     private static final String CHAT_URL = SERVER_BASE + "/chat";
+    private static final String FILES_URL = SERVER_BASE + "/files";
 
     // Menu data (initial menu from server)
     private Map<String, MenuItem> menuItems = new HashMap<>();
@@ -73,6 +86,7 @@ public class MainActivity extends Activity {
     // Dynamic options (parsed from response)
     private Map<String, String> dynamicOptions = new HashMap<>();
     private boolean hasDynamicOptions = false;
+    private int rerollCount = 0;  // Track re-roll rounds for 20-questions escalation
     
     private String pendingAction = null;
     private String voicePrompt = null;
@@ -278,7 +292,7 @@ public class MainActivity extends Activity {
         titleText.setVisibility(View.VISIBLE);
         menuText.setText(sb.toString());
         menuText.setVisibility(View.VISIBLE);
-        statusText.setText("*=TTS  1-9=Select");
+        statusText.setText("*=TTS #=Shiurim 1-9=Select");
         statusText.setTextColor(Color.GREEN);
         statusText.setTextSize(22);  // Restore normal size
         optionsText.setText("");
@@ -325,6 +339,8 @@ public class MainActivity extends Activity {
                 return handleConfirmKey(key);
             case STATE_VOICE_PROMPT:
                 return handleVoicePromptKey(key);
+            case STATE_DOWNLOAD_LIST:
+                return handleDownloadListKey(key);
         }
 
         return super.onKeyDown(keyCode, event);
@@ -353,6 +369,12 @@ public class MainActivity extends Activity {
             // Update title with new TTS status
             String ttsStatus = ttsEnabled ? "🔊" : "🔇";
             titleText.setText(ttsStatus + " QinBot");
+            return true;
+        }
+        
+        // # key = Download Shiurim
+        if (key.equals("#")) {
+            loadFileList();
             return true;
         }
         
@@ -418,7 +440,47 @@ public class MainActivity extends Activity {
     }
 
     private boolean handleResponseKey(String key) {
-        // Check if this key has a dynamic option
+        // === GLOBAL KEYS (always work, never overridden by dynamic options) ===
+        
+        // 5 key = VOICE INPUT (always available, like from main menu)
+        if (key.equals("5")) {
+            stopSpeaking();
+            menuText.setVisibility(View.GONE);
+            statusText.setText("Press 1 to speak");
+            statusText.setTextColor(Color.CYAN);
+            currentState = STATE_VOICE_PROMPT;
+            pendingAction = "chat";  // Free-form follow-up
+            return true;
+        }
+        
+        // 8 key = RE-ROLL: 20-questions style — AI guesses harder
+        if (key.equals("8")) {
+            stopSpeaking();
+            rerollCount++;
+            String rerollPrompt;
+            if (rerollCount == 1) {
+                rerollPrompt = "None of those options matched. Play 20-questions with me — I can ONLY press numbers, not speak. Based on everything you know about me (my projects, Brain MCP threads, recent focus, time of day, cognitive patterns), make 7 HYPER-SPECIFIC guesses of what I probably want right now. Think: what would Mordechai most likely need at this moment? Be creative. Don't repeat previous options.";
+            } else if (rerollCount == 2) {
+                rerollPrompt = "Still not right. Go wider — think laterally. Maybe I want something personal, emotional, Torah-related, or about a specific person/project. 7 new guesses, completely different angle. One of them should be surprising.";
+            } else {
+                rerollPrompt = "OK round " + (rerollCount + 1) + ". Try the OPPOSITE of what you've been guessing. Maybe I want something simple, or maybe something you'd never expect. 7 fresh guesses. Include at least one wildcard.";
+            }
+            sendFollowUp(rerollPrompt);
+            return true;
+        }
+        
+        // 9 key = voice input in response context (legacy, same as 5)
+        if (key.equals("9")) {
+            stopSpeaking();
+            menuText.setVisibility(View.GONE);
+            statusText.setText("Press 1 to speak");
+            statusText.setTextColor(Color.CYAN);
+            currentState = STATE_VOICE_PROMPT;
+            pendingAction = "chat";  // Free-form follow-up
+            return true;
+        }
+        
+        // === DYNAMIC OPTION KEYS (1-4, 6-7 only — 5,8,9 are reserved) ===
         if (dynamicOptions.containsKey(key)) {
             String optionText = dynamicOptions.get(key);
             stopSpeaking();  // Stop TTS when selecting option
@@ -439,17 +501,6 @@ public class MainActivity extends Activity {
                 ttsEnabled = true;  // Force enable for repeat
                 speakResponse(text);
             }
-            return true;
-        }
-        
-        // 5 key = voice input in response context
-        if (key.equals("5")) {
-            stopSpeaking();
-            menuText.setVisibility(View.GONE);
-            statusText.setText("Press 1 to speak");
-            statusText.setTextColor(Color.CYAN);
-            currentState = STATE_VOICE_PROMPT;
-            pendingAction = "chat";  // Free-form follow-up
             return true;
         }
         
@@ -921,6 +972,254 @@ public class MainActivity extends Activity {
         }.execute();
     }
 
+    // ═══════════════════════════════════════════════════════════════════
+    // SHIURIM DOWNLOAD
+    // ═══════════════════════════════════════════════════════════════════
+    
+    private void loadFileList() {
+        currentState = STATE_DOWNLOADING;
+        clearResponseArea();
+        menuText.setVisibility(View.GONE);
+        titleText.setText("📥 Shiurim");
+        statusText.setText("⏳ Loading...");
+        statusText.setTextColor(Color.YELLOW);
+        
+        new AsyncTask<Void, Void, String>() {
+            @Override
+            protected String doInBackground(Void... params) {
+                try {
+                    URL url = new URL(FILES_URL);
+                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                    conn.setConnectTimeout(15000);
+                    conn.setReadTimeout(10000);
+                    if (conn.getResponseCode() == 200) {
+                        BufferedReader reader = new BufferedReader(
+                            new InputStreamReader(conn.getInputStream()));
+                        StringBuilder sb = new StringBuilder();
+                        String line;
+                        while ((line = reader.readLine()) != null) sb.append(line);
+                        reader.close();
+                        return sb.toString();
+                    }
+                } catch (Exception e) {
+                    return "ERROR:" + e.getMessage();
+                }
+                return "ERROR:Failed to load";
+            }
+            
+            @Override
+            protected void onPostExecute(String result) {
+                if (result.startsWith("ERROR:")) {
+                    statusText.setText(result.substring(6));
+                    statusText.setTextColor(Color.RED);
+                    showMainMenuDelayed();
+                    return;
+                }
+                try {
+                    JSONObject json = new JSONObject(result);
+                    JSONArray files = json.getJSONArray("files");
+                    downloadFileList.clear();
+                    for (int i = 0; i < files.length(); i++) {
+                        downloadFileList.add(files.getJSONObject(i));
+                    }
+                    downloadPage = 0;
+                    showDownloadPage();
+                } catch (Exception e) {
+                    statusText.setText("Parse error");
+                    statusText.setTextColor(Color.RED);
+                    showMainMenuDelayed();
+                }
+            }
+        }.execute();
+    }
+    
+    private void showDownloadPage() {
+        currentState = STATE_DOWNLOAD_LIST;
+        int start = downloadPage * FILES_PER_PAGE;
+        int end = Math.min(start + FILES_PER_PAGE, downloadFileList.size());
+        
+        StringBuilder sb = new StringBuilder();
+        sb.append("📥 SHIURIM (").append(downloadFileList.size()).append(" files)\n\n");
+        
+        // Check which are already downloaded
+        File musicDir = new File(Environment.getExternalStoragePublicDirectory(
+            Environment.DIRECTORY_MUSIC), "Weinberger");
+        
+        for (int i = start; i < end; i++) {
+            try {
+                JSONObject file = downloadFileList.get(i);
+                String name = file.getString("name");
+                double sizeMb = file.getDouble("size_mb");
+                int key = (i - start) + 1;
+                
+                // Check if already downloaded
+                String displayName = name.replace(".mp3", "").replace("_", " ");
+                // Truncate long names for Qin screen
+                if (displayName.length() > 28) {
+                    displayName = displayName.substring(0, 25) + "...";
+                }
+                
+                boolean exists = musicDir.exists() && 
+                    new File(musicDir, name).exists();
+                String check = exists ? " ✓" : "";
+                
+                sb.append(key).append(": ").append(displayName)
+                  .append(check).append("\n");
+            } catch (Exception e) {}
+        }
+        
+        responseText.setText(sb.toString());
+        
+        // Navigation hints
+        StringBuilder nav = new StringBuilder();
+        if (end < downloadFileList.size()) {
+            nav.append("*=Next page  ");
+        }
+        if (downloadPage > 0) {
+            nav.append("#=Prev  ");
+        }
+        nav.append("0=Back");
+        statusText.setText(nav.toString());
+        statusText.setTextColor(Color.CYAN);
+        
+        titleText.setVisibility(View.VISIBLE);
+        menuText.setVisibility(View.GONE);
+    }
+    
+    private boolean handleDownloadListKey(String key) {
+        if (key.equals("*")) {
+            // Next page
+            int maxPage = (downloadFileList.size() - 1) / FILES_PER_PAGE;
+            if (downloadPage < maxPage) {
+                downloadPage++;
+                showDownloadPage();
+            }
+            return true;
+        }
+        if (key.equals("#")) {
+            // Previous page
+            if (downloadPage > 0) {
+                downloadPage--;
+                showDownloadPage();
+            }
+            return true;
+        }
+        
+        // Number key = download that file
+        try {
+            int num = Integer.parseInt(key);
+            if (num >= 1 && num <= 9) {
+                int index = downloadPage * FILES_PER_PAGE + (num - 1);
+                if (index < downloadFileList.size()) {
+                    downloadFile(downloadFileList.get(index));
+                    return true;
+                }
+            }
+        } catch (NumberFormatException e) {}
+        
+        return false;
+    }
+    
+    private void downloadFile(final JSONObject fileInfo) {
+        currentState = STATE_DOWNLOADING;
+        try {
+            final String name = fileInfo.getString("name");
+            final String path = fileInfo.getString("path");
+            final double sizeMb = fileInfo.getDouble("size_mb");
+            
+            statusText.setText("📥 " + String.format("%.0fMB", sizeMb) + "...");
+            statusText.setTextColor(Color.YELLOW);
+            responseText.setText("Downloading:\n" + name.replace("_", " "));
+            
+            new AsyncTask<Void, Integer, String>() {
+                @Override
+                protected String doInBackground(Void... params) {
+                    HttpURLConnection conn = null;
+                    InputStream is = null;
+                    FileOutputStream fos = null;
+                    try {
+                        // Create Music/Weinberger directory
+                        File musicDir = new File(
+                            Environment.getExternalStoragePublicDirectory(
+                                Environment.DIRECTORY_MUSIC), "Weinberger");
+                        if (!musicDir.exists()) musicDir.mkdirs();
+                        
+                        File outFile = new File(musicDir, name);
+                        
+                        // Skip if already exists and same size
+                        if (outFile.exists()) {
+                            long existingSize = outFile.length();
+                            long expectedSize = (long)(sizeMb * 1024 * 1024);
+                            if (Math.abs(existingSize - expectedSize) < 100000) {
+                                return "EXISTS";
+                            }
+                        }
+                        
+                        URL url = new URL(SERVER_BASE + path);
+                        conn = (HttpURLConnection) url.openConnection();
+                        conn.setConnectTimeout(30000);
+                        conn.setReadTimeout(120000);
+                        
+                        int total = conn.getContentLength();
+                        is = conn.getInputStream();
+                        fos = new FileOutputStream(outFile);
+                        
+                        byte[] buffer = new byte[8192];
+                        int bytesRead;
+                        int totalRead = 0;
+                        
+                        while ((bytesRead = is.read(buffer)) != -1) {
+                            fos.write(buffer, 0, bytesRead);
+                            totalRead += bytesRead;
+                            if (total > 0) {
+                                publishProgress((totalRead * 100) / total);
+                            }
+                        }
+                        fos.flush();
+                        
+                        return "OK:" + outFile.getAbsolutePath();
+                    } catch (Exception e) {
+                        return "ERROR:" + e.getMessage();
+                    } finally {
+                        try { if (is != null) is.close(); } catch (IOException e) {}
+                        try { if (fos != null) fos.close(); } catch (IOException e) {}
+                        if (conn != null) conn.disconnect();
+                    }
+                }
+                
+                @Override
+                protected void onProgressUpdate(Integer... values) {
+                    statusText.setText("📥 " + values[0] + "%");
+                }
+                
+                @Override
+                protected void onPostExecute(String result) {
+                    if (result.equals("EXISTS")) {
+                        statusText.setText("✓ Already downloaded!");
+                        statusText.setTextColor(Color.GREEN);
+                    } else if (result.startsWith("OK:")) {
+                        statusText.setText("✅ Downloaded!");
+                        statusText.setTextColor(Color.GREEN);
+                        if (ttsEnabled && ttsReady) {
+                            tts.speak("Downloaded", TextToSpeech.QUEUE_FLUSH, null);
+                        }
+                    } else {
+                        statusText.setText("❌ " + result.substring(6));
+                        statusText.setTextColor(Color.RED);
+                    }
+                    // Return to file list after delay
+                    statusText.postDelayed(() -> showDownloadPage(), 2000);
+                }
+            }.execute();
+        } catch (Exception e) {
+            statusText.setText("Error: " + e.getMessage());
+            statusText.setTextColor(Color.RED);
+            showMainMenuDelayed();
+        }
+    }
+    
+    // ═══════════════════════════════════════════════════════════════════
+
     private void displayResponse(String response) {
         // Parse dynamic options from response
         dynamicOptions.clear();
@@ -956,13 +1255,22 @@ public class MainActivity extends Activity {
         menuText.setVisibility(View.GONE);
         
         String ttsStatus = ttsEnabled ? "🔊" : "🔇";
+        // Always add [5] Voice and [8] Re-roll to options display (reserved keys)
         if (hasDynamicOptions) {
+            // Remove any AI-generated options for reserved keys 5, 8, 9
+            dynamicOptions.remove("5");
+            dynamicOptions.remove("8");
+            dynamicOptions.remove("9");
+            optionsSb.append("[5] 🎤 Voice\n");
+            optionsSb.append("[8] 🔄 Shuffle\n");
+            optionsSb.append("[0] ← Menu");
             optionsText.setText(optionsSb.toString().trim());
             optionsText.setVisibility(View.VISIBLE);
-            statusText.setText(ttsStatus + " 0=Menu 5=Voice *=TTS");
+            statusText.setText(ttsStatus + " *=TTS #=Repeat");
         } else {
-            optionsText.setVisibility(View.GONE);
-            statusText.setText(ttsStatus + " 0=Menu 5=Voice *=TTS");
+            optionsText.setText("[5] 🎤 Voice\n[8] 🔄 Shuffle\n[0] ← Menu");
+            optionsText.setVisibility(View.VISIBLE);
+            statusText.setText(ttsStatus + " *=TTS #=Repeat");
         }
         
         statusText.setTextColor(Color.GREEN);
@@ -973,6 +1281,7 @@ public class MainActivity extends Activity {
         voicePrompt = null;
         lastTranscript = "";
         transcriptText.setText("");
+        rerollCount = 0;  // Reset 20-questions counter on new response
         currentState = STATE_RESPONSE;
     }
 

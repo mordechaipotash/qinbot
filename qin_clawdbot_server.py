@@ -70,7 +70,7 @@ CLAWDBOT_API = os.getenv("CLAWDBOT_API", "http://127.0.0.1:18789/v1/chat/complet
 CLAWDBOT_TOKEN = os.getenv("CLAWDBOT_TOKEN", "")
 
 # Whisper model (tiny for speed, base for accuracy)
-WHISPER_MODEL = os.getenv("WHISPER_MODEL", "tiny")
+WHISPER_MODEL = os.getenv("WHISPER_MODEL", "small")
 
 PORT = 8081
 
@@ -91,7 +91,7 @@ MENU_CONFIG = {
 
 # Fallback menu if AI unavailable
 FALLBACK_MENU = {
-    "4": {"label": "📧 Emails", "type": "instant", "command": "Check my emails briefly."},
+    "4": {"label": "📧 Emails", "type": "instant", "command": "Check my emails briefly. When showing an individual email, always end with numbered quick reply options: [1] Reply: 'Got it, thanks' [2] Reply: 'I'll handle this' [3] Reply: 'Let's schedule a call' [4] Custom reply (voice) [0] Back to inbox"},
     "5": {"label": "📅 Calendar", "type": "instant", "command": "What's on my calendar today?"},
     "6": {"label": "🌤️ Weather", "type": "instant", "command": "What's the weather?"},
     "7": {"label": "⏰ Remind", "type": "voice", "prompt": "What reminder?"},
@@ -106,66 +106,136 @@ MENU_CACHE_SECONDS = 300
 
 
 def generate_dynamic_menu():
-    """Ask Clawdbot to generate context-aware menu options for slots 4-9."""
+    """Build menu from REAL data sources — no AI guessing."""
     global dynamic_menu_cache
-    
+
     # Check cache
     now = time.time()
     if dynamic_menu_cache["items"] and (now - dynamic_menu_cache["timestamp"]) < MENU_CACHE_SECONDS:
         return dynamic_menu_cache["items"]
-    
+
+    import datetime
+    hour = datetime.datetime.now().hour
+    weekday = datetime.datetime.now().strftime("%A")
+
+    menu = {}
+
+    # === Slot 4: Always NEWS (most used) ===
+    menu["4"] = {
+        "label": "📰 News Brief",
+        "type": "instant",
+        "command": "Give me a quick 30-second AI and tech news briefing. What's the most important thing happening today? Be concise."
+    }
+
+    # === Slot 5: Always BRAIN (most used feature) ===
+    menu["5"] = {
+        "label": "🧠 Brain Query",
+        "type": "voice",
+        "prompt": "What to search?"
+    }
+
+    # === Slot 6: Context-aware from REAL data ===
+    # Read active threads from brain-sync.json
     try:
-        prompt = """Generate 6 contextual quick-action options for my Qin phone assistant menu.
-Consider: current time, day of week, what might be useful RIGHT NOW.
+        sync_path = os.path.expanduser("~/clawd/memory/brain-sync.json")
+        if os.path.exists(sync_path):
+            with open(sync_path) as f:
+                sync = json.loads(f.read())
+            threads = sync.get("activeThreads", [])
+            decisions = sync.get("openDecisions", [])
+            if decisions:
+                # Show first open decision
+                decision = decisions[0]
+                short = decision[:20] + "..." if len(decision) > 20 else decision
+                menu["6"] = {
+                    "label": "📋 " + short[:13],
+                    "type": "instant",
+                    "command": f"What's the status on: {decision}? Give me a quick update and next steps."
+                }
+            elif threads:
+                thread = threads[0]
+                short = thread[:20] + "..." if len(thread) > 20 else thread
+                menu["6"] = {
+                    "label": "🔥 " + short[:13],
+                    "type": "instant",
+                    "command": f"Quick update on: {thread}"
+                }
+    except Exception:
+        pass
+    if "6" not in menu:
+        menu["6"] = {"label": "📧 Emails", "type": "instant",
+                      "command": "Check my emails briefly. Summarize unread - who, subject, urgency."}
 
-Return ONLY a JSON object, no markdown, no explanation:
-{
-  "4": {"label": "emoji + short label (max 15 chars)", "type": "instant", "command": "what to do"},
-  "5": {"label": "...", "type": "instant", "command": "..."},
-  "6": {"label": "...", "type": "instant", "command": "..."},
-  "7": {"label": "...", "type": "voice", "prompt": "short prompt for voice input"},
-  "8": {"label": "...", "type": "voice", "prompt": "..."},
-  "9": {"label": "...", "type": "instant", "command": "..."}
-}
+    # === Slot 7: Weather (always useful, Beit Shemesh only) ===
+    menu["7"] = {
+        "label": "🌤️ Weather",
+        "type": "instant",
+        "command": "What's the weather in Beit Shemesh today and tomorrow? Short answer."
+    }
 
-Types: "instant" = runs command immediately, "voice" = asks for voice input first.
-Be contextual - if it's morning suggest different things than evening.
-Keep labels SHORT with emoji. Commands should be clear instructions to an AI assistant."""
+    # === Slot 8: Continue last thread ===
+    # Read last Qin chat topic from log
+    last_topic = None
+    try:
+        with open("/tmp/qin-server.log") as f:
+            lines = f.readlines()
+        for line in reversed(lines):
+            if "📱 Chat:" in line:
+                topic = line.split("📱 Chat:")[1].strip()
+                if topic and len(topic) > 5 and "menu" not in topic.lower():
+                    last_topic = topic
+                    break
+    except Exception:
+        pass
 
-        payload = json.dumps({
-            "model": "clawdbot:main",
-            "messages": [{"role": "user", "content": prompt}],
-            "user": "qin-menu"
-        }).encode("utf-8")
-
-        headers = {
-            "Content-Type": "application/json",
-            "x-clawdbot-agent-id": "main"
+    if last_topic:
+        short = last_topic[:18] + "..." if len(last_topic) > 18 else last_topic
+        menu["8"] = {
+            "label": "🔄 Continue",
+            "type": "instant",
+            "command": f"Continue where we left off. Last topic was: {last_topic}. Go deeper."
         }
-        if CLAWDBOT_TOKEN:
-            headers["Authorization"] = f"Bearer {CLAWDBOT_TOKEN}"
+    else:
+        menu["8"] = {
+            "label": "🔄 Go Deeper",
+            "type": "instant",
+            "command": "Continue the last conversation and go deeper."
+        }
 
-        req = urllib.request.Request(CLAWDBOT_API, data=payload, headers=headers, method="POST")
-        
-        with urllib.request.urlopen(req, timeout=30) as resp:
-            result = json.loads(resp.read().decode("utf-8"))
-            if "choices" in result and len(result["choices"]) > 0:
-                content = result["choices"][0]["message"]["content"]
-                # Parse JSON from response (might have markdown wrapper)
-                content = content.strip()
-                if content.startswith("```"):
-                    content = content.split("```")[1]
-                    if content.startswith("json"):
-                        content = content[4:]
-                menu_items = json.loads(content.strip())
-                dynamic_menu_cache["items"] = menu_items
-                dynamic_menu_cache["timestamp"] = now
-                print(f"🔄 Dynamic menu generated: {list(menu_items.keys())}")
-                return menu_items
-    except Exception as e:
-        print(f"⚠️ Dynamic menu failed: {e}, using fallback")
-    
-    return FALLBACK_MENU
+    # === Slot 9: Time-aware ===
+    if hour < 10:
+        # Morning: focus recap
+        menu["9"] = {
+            "label": "🎯 Focus Today",
+            "type": "instant",
+            "command": "What should I focus on today? Check my memory files, open decisions, and active threads. Give me 3 priorities."
+        }
+    elif hour < 14:
+        # Midday: momentum check
+        menu["9"] = {
+            "label": "⚡ Momentum",
+            "type": "instant",
+            "command": "What have I been focused on the last few days? Brief summary of projects, priorities, momentum."
+        }
+    elif 14 <= hour < 18:
+        # Afternoon: what's next
+        menu["9"] = {
+            "label": "📝 What's Next",
+            "type": "instant",
+            "command": "What should I tackle next? Check open decisions and active threads."
+        }
+    else:
+        # Evening: review
+        menu["9"] = {
+            "label": "📊 Day Review",
+            "type": "instant",
+            "command": "Quick review of what happened today. Check memory files and recent activity."
+        }
+
+    dynamic_menu_cache["items"] = menu
+    dynamic_menu_cache["timestamp"] = now
+    print(f"📊 Data-driven menu built: {[menu[k]['label'] for k in sorted(menu.keys())]}")
+    return menu
 
 
 class QinHandler(BaseHTTPRequestHandler):
@@ -194,6 +264,10 @@ class QinHandler(BaseHTTPRequestHandler):
                 "items": dynamic_items
             }
             self.send_json(menu)
+        elif self.path.startswith("/files/"):
+            self.handle_file_serve()
+        elif self.path == "/files" or self.path == "/files/":
+            self.handle_file_list()
         else:
             self.send_error(404)
 
@@ -206,6 +280,49 @@ class QinHandler(BaseHTTPRequestHandler):
             self.handle_action()
         else:
             self.send_error(404)
+
+    def handle_file_list(self):
+        """List available files for download."""
+        files_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "shiurim")
+        result = []
+        if os.path.isdir(files_dir):
+            for root, dirs, files in os.walk(files_dir):
+                for f in sorted(files):
+                    if f.endswith(('.mp3', '.m4a', '.wav', '.ogg', '.apk')):
+                        rel = os.path.relpath(os.path.join(root, f), os.path.dirname(os.path.abspath(__file__)))
+                        size_mb = os.path.getsize(os.path.join(root, f)) / (1024 * 1024)
+                        result.append({"name": f, "path": f"/files/{rel}", "size_mb": round(size_mb, 1)})
+        self.send_json({"files": result, "count": len(result)})
+
+    def handle_file_serve(self):
+        """Serve a file from the shiurim/ directory."""
+        import urllib.parse
+        # Strip /files/ prefix and decode URL encoding
+        rel_path = urllib.parse.unquote(self.path[7:])  # Remove "/files/"
+        # Security: prevent directory traversal
+        if ".." in rel_path or rel_path.startswith("/"):
+            self.send_error(403, "Forbidden")
+            return
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        file_path = os.path.join(base_dir, rel_path)
+        if not os.path.isfile(file_path):
+            self.send_error(404, "File not found")
+            return
+        # Determine content type
+        ext = os.path.splitext(file_path)[1].lower()
+        content_types = {
+            '.mp3': 'audio/mpeg', '.m4a': 'audio/mp4', '.wav': 'audio/wav',
+            '.ogg': 'audio/ogg', '.apk': 'application/vnd.android.package-archive',
+        }
+        ctype = content_types.get(ext, 'application/octet-stream')
+        fsize = os.path.getsize(file_path)
+        self.send_response(200)
+        self.send_header("Content-Type", ctype)
+        self.send_header("Content-Length", str(fsize))
+        self.send_header("Content-Disposition", f'attachment; filename="{os.path.basename(file_path)}"')
+        self.end_headers()
+        with open(file_path, "rb") as f:
+            shutil.copyfileobj(f, self.wfile)
 
     def handle_action(self):
         """Handle a menu action (instant or with voice input)."""
@@ -285,8 +402,12 @@ class QinHandler(BaseHTTPRequestHandler):
 
                 print("🎤 Transcribing...")
                 result = subprocess.run(
-                    ["/Users/mordechai/.local/bin/whisper", wav_path, "--model", WHISPER_MODEL, "--output_format", "txt", "--output_dir", "/tmp"],
-                    capture_output=True, text=True, timeout=60
+                    ["/Users/mordechai/.local/bin/whisper", wav_path,
+                     "--model", WHISPER_MODEL,
+                     "--language", "en",
+                     "--initial_prompt", "South African English speaker discussing AI, technology, monotropism, Clawdbot, Brain MCP, SHELET, cron jobs, Israel ecosystem, Torah, Chassidus, kosher phone, QinBot. Names: Mordechai, Shaul, Weinberger. Technical terms: parquet, embeddings, LanceDB, Claude, Anthropic, OpenRouter.",
+                     "--output_format", "txt", "--output_dir", "/tmp"],
+                    capture_output=True, text=True, timeout=120
                 )
 
                 txt_path = "/tmp/" + os.path.basename(wav_path).rsplit(".", 1)[0] + ".txt"
@@ -354,21 +475,45 @@ class QinHandler(BaseHTTPRequestHandler):
         """Send text to Clawdbot and get response via OpenAI-compatible API."""
         try:
             # Inject instruction for dynamic menus - PREEMPTIVE is the goal
-            enhanced_text = text + """
+            # Read active context for smarter guessing
+            context_hint = ""
+            try:
+                sync_path = os.path.expanduser("~/clawd/memory/brain-sync.json")
+                if os.path.exists(sync_path):
+                    with open(sync_path) as f:
+                        sync = json.loads(f.read())
+                    threads = sync.get("activeThreads", [])[:3]
+                    decisions = sync.get("openDecisions", [])[:3]
+                    focus = sync.get("weekFocus", "")
+                    if threads or decisions:
+                        context_hint = f"\nUser's active threads: {'; '.join(threads[:3])}"
+                        if decisions:
+                            context_hint += f"\nOpen decisions: {'; '.join(decisions[:3])}"
+                        if focus:
+                            context_hint += f"\nWeek focus: {focus}"
+            except Exception:
+                pass
 
-[IMPORTANT - QIN INTERFACE RULES:
-User can ONLY respond by: pressing a number (1-9, 0) OR voice recording.
-Your job: Be so preemptive that numbers handle 90% of interactions.
+            enhanced_text = text + f"""
 
-End EVERY response with 2-5 numbered options:
-[1] Most likely next action
-[2] Second most likely  
-[3] Alternative
-[0] ← Back/Menu
+[QIN INTERFACE — 20-QUESTIONS MODE:
+User is on a tiny kosher phone. Can ONLY press numbers 1-7 or 0. NO TYPING.
+Your superpower: GUESS what he wants next. Play 20-questions — each set of options should narrow down his intent.
 
-Options should be COMPLETE ACTIONS, not questions. 
-Instead of "[1] Yes [2] No" → "[1] Send it [2] Edit first [3] Cancel"
-Keep options SHORT (≤25 chars). Be specific, not generic.]"""
+Think like this: "Given what I just told him, what would Mordechai MOST LIKELY want to do next?"
+Be hyper-specific. Not "learn more" but "connect this to SHELET" or "mine Brain for precedent".
+
+Rules:
+- End EVERY response with [1]-[7] options
+- Options = COMPLETE ACTIONS, hyper-specific to context
+- NEVER use [8] or [9] (system reserves those)
+- Keep options SHORT (≤25 chars)
+- At least one option should be surprising/creative
+- [0] ← Back/Menu
+
+Context: Mordechai, South African accent, in Israel. Direct, no fluff.
+Primary uses: deep thinking, brainstorming, news, Brain MCP, connecting ideas.
+{context_hint}]"""
             
             # OpenAI-compatible format
             payload = json.dumps({
