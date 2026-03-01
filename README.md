@@ -150,8 +150,8 @@ Brain MCP is a **queryable archive of your entire intellectual history** — eve
 
 | Source | Count |
 |--------|-------|
-| **Conversations** | 367,684 messages (132,815 from user) |
-| **Embeddings** | 107,682 semantic vectors (768-dimensional, LanceDB) |
+| **Conversations** | 377,326 messages (132,815 from user) |
+| **Embeddings** | 82,000+ semantic vectors (768-dimensional, LanceDB) |
 | **GitHub** | 132 repositories, 1,427 commits |
 | **YouTube** | 31,832 videos tracked (16,386 watched) |
 | **Google Searches** | 52,791 queries |
@@ -173,47 +173,28 @@ Brain MCP has extracted **8 foundational mental models** from analyzing hundreds
 | **COGNITIVE ARCHITECTURE** | Design systems that amplify YOUR specific mind | 18 |
 | **SEEDS & SOVEREIGNTY** | Autonomous, bounded systems with clear interfaces | 17 |
 
-### 92 Query Tools
+### 25 Consolidated Tools
 
-Brain MCP exposes **92 specialized tools** for querying your intellectual DNA:
+Brain MCP exposes **25 tools** (17 generic + 8 prosthetic) for querying your intellectual DNA. The original 92 tools were consolidated into a focused, high-signal set:
 
-```mermaid
-graph TB
-    subgraph SearchDiscovery["Search & Discovery"]
-        S1["semantic_search: Conceptual similarity"]
-        S2["search_conversations: Full-text across 367K msgs"]
-        S3["unified_search: All sources at once"]
-        S4["search_markdown: 5,524 documents"]
-    end
-    
-    subgraph SelfKnowledge["Self-Knowledge"]
-        K1["what_do_i_think: Synthesize your views"]
-        K2["thinking_trajectory: How ideas evolved"]
-        K3["alignment_check: Does this fit my principles"]
-        K4["find_precedent: Similar past situations"]
-    end
-    
-    subgraph TemporalQueries["Temporal Queries"]
-        T1["what_was_i_thinking: By month"]
-        T2["first_mention: When did I start"]
-        T3["concept_velocity: Idea frequency over time"]
-        T4["conversations_by_date: What happened when"]
-    end
-    
-    subgraph ProjectIntelligence["Project Intelligence"]
-        P1["github_project_timeline: Commit history"]
-        P2["code_to_conversation: Link code to discussions"]
-        P3["query_project_arcs: Project narratives"]
-        P4["get_open_todos: Pending tasks"]
-    end
-    
-    subgraph MetaAnalysis["Meta-Analysis"]
-        M1["query_monthly_themes: What dominated each month"]
-        M2["query_intellectual_evolution: How thinking changed"]
-        M3["query_signature_phrases: Your verbal patterns"]
-        M4["query_mood: Emotional patterns"]
-    end
-```
+**🧠 Cognitive Prosthetic Tools (8)** — designed for ADHD/monotropic minds:
+- `tunnel_state` — "load game" for any domain (where was I?)
+- `context_recovery` — full re-entry brief when returning to a topic
+- `switching_cost` — quantified cost of changing focus
+- `open_threads` — all unfinished business across all domains
+- `dormant_contexts` — abandoned tunnels alarm
+- `cognitive_patterns` — when do I think best?
+- `tunnel_history` / `trust_dashboard` — engagement tracking & system health
+
+**🔍 Generic Tools (17)** — search, synthesis, GitHub, analytics:
+- **Search:** `semantic_search`, `search_conversations`, `unified_search`, `search_summaries`, `search_docs`, `unfinished_threads`
+- **Synthesis:** `what_do_i_think`, `alignment_check`, `thinking_trajectory`, `what_was_i_thinking`
+- **Conversation:** `get_conversation`, `conversations_by_date`, `brain_stats`
+- **GitHub:** `github_search` (consolidated: timeline/conversations/code/validate)
+- **Analytics:** `query_analytics` (consolidated: timeline/stacks/problems/spend)
+- **Meta:** `list_principles`, `get_principle`
+
+> 📦 See [brain-mcp](https://github.com/mordechaipotash/brain-mcp) for full documentation and architecture.
 
 ### Example Queries from Qin
 
@@ -239,8 +220,8 @@ graph LR
         B[Bridge Server]
         G[Clawdbot Gateway]
         MCP["Brain MCP Server"]
-        DB[("SQLite: 367K messages")]
-        LANCE[("LanceDB: 107K embeddings")]
+        DB[("SQLite: 377K messages")]
+        LANCE[("LanceDB: 82K embeddings")]
     end
     
     Q -->|HTTPS| B
@@ -722,6 +703,35 @@ tail -f /tmp/qin-tunnel.err
 - [OpenAI Whisper](https://github.com/openai/whisper) — Speech recognition
 - [Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/) — Secure tunneling
 - [Qin F21 Pro](https://www.duoqin.com/) — The hardware that makes this possible
+
+---
+
+## 🌐 Ecosystem
+
+QinBot is part of a larger system of interconnected tools:
+
+```mermaid
+graph LR
+    BM[brain-mcp] -->|memory / knowledge| QB[🔹 qinbot]
+    LV[local-voice-ai] -->|voice I/O| QB
+    MN[mordenews] -->|news briefings| QB
+    AML[agent-memory-loop] -.->|manages| BM
+    AML -.->|manages| QB
+    AML -.->|manages| LV
+    AML -.->|manages| MN
+    XS[x-search] -.->|research| QB
+    BC[brain-canvas] -.->|visual display| QB
+```
+
+| Repository | Description |
+|-----------|-------------|
+| **🔹 qinbot** | ← You are here — AI assistant for non-smartphone users |
+| [brain-mcp](https://github.com/mordechaipotash/brain-mcp) | Intellectual DNA — 377K messages, 82K vectors, 25 MCP tools |
+| [local-voice-ai](https://github.com/mordechaipotash/local-voice-ai) | Local Whisper STT + Kokoro TTS on Apple Silicon |
+| [agent-memory-loop](https://github.com/mordechaipotash/agent-memory-loop) | Agent maintenance layer — memory, cron, context |
+| [mordenews](https://github.com/mordechaipotash/mordenews) | Podcast pipeline — generates news briefings |
+| [x-search](https://github.com/mordechaipotash/x-search) | Live X/Twitter search via Grok |
+| [brain-canvas](https://github.com/mordechaipotash/brain-canvas) | Visual display for Brain MCP data |
 
 ---
 
