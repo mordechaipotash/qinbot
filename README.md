@@ -8,10 +8,10 @@
 
 
 <p align="center">
-  <img src="demo-screenshots/watch-demo.gif" alt="Watch the demo" width="600"/>
+  <img src="demo-screenshots/demo-autoplay.gif" alt="QinBot Demo" width="640"/>
 </p>
 
-https://github.com/user-attachments/assets/2474b03e-0d2d-4d3d-b9dc-9d4293dfc009
+<p align="center"><i>⬆️ Auto-playing preview — <a href="https://github.com/user-attachments/assets/2474b03e-0d2d-4d3d-b9dc-9d4293dfc009">click here for full video with audio</a></i></p>
 
 
 ---
