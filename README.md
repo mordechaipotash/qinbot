@@ -7,6 +7,10 @@
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 
 
+<p align="center">
+  <img src="demo-screenshots/watch-demo.gif" alt="Watch the demo" width="600"/>
+</p>
+
 https://github.com/user-attachments/assets/2474b03e-0d2d-4d3d-b9dc-9d4293dfc009
 
 
