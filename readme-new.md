@@ -2,7 +2,10 @@
 
 **Full Claude AI on a phone with no browser, no apps, no images.**
 
-[![Watch the demo](assets/thumbnail.png)](https://github.com/mordechaipotash/qinbot/raw/main/assets/demo.mp4)
+
+https://github.com/user-attachments/assets/391ae33f-9806-43bf-81eb-3d1a1058cd1a
+
+
 
 > 🎬 *Click to watch the demo video (qinbot)*
 
