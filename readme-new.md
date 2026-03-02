@@ -6,6 +6,10 @@
 ![AI](https://img.shields.io/badge/AI-Claude%20via%20Clawdbot-purple.svg)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 
+
+https://github.com/user-attachments/assets/883bc022-a181-4f56-aa90-a757f7d9d841
+
+
 ---
 
 ## The Problem
