@@ -2,7 +2,7 @@
 
 **Full Claude AI on a phone with no browser, no apps, no images.**
 
-https://github.com/mordechaipotash/qinbot/raw/main/assets/demo.mp4
+<video src="https://github.com/mordechaipotash/qinbot/raw/main/assets/demo.mp4" width="100%" autoplay loop muted playsinline></video>
 
 ---
 
